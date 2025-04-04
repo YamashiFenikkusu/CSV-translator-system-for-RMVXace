@@ -1,7 +1,7 @@
 #==============================================================================
 # ** Multilingual System
 #------------------------------------------------------------------------------
-# ★ Yamashi Fenikkusu - v0.1
+# ★ Yamashi Fenikkusu - v0.2
 # https://github.com/YamashiFenikkusu/RMVXace-multilingual-system/tree/main
 #------------------------------------------------------------------------------
 # This script able your game to be multilingual. It's using csv file.
@@ -21,26 +21,20 @@ class MultilingualSystem
   # * Commands
   #  -MultilingualSystem.read_key("tableName", "keyName"):
   #     Read a key in a csv file
-  #  -MultilingualSystem.set_language("desiredLanguage)
+  #  -MultilingualSystem.set_language("desiredLanguage")
   #--------------------------------------------------------------------------
   # * Variables
   #  -ROOT_FOLDER:
   #     The folder where csv files are located. By delfaut in the project root.
   #  -@@languages:
   #     The languages of the game. The headers keys must be the same as the keys in the array.
-  #  -@@current_language:
+  #  -$current_language:
   #     The current language of the game. "EN" by delfaut.
   #--------------------------------------------------------------------------
   ROOT_FOLDER = "CSV/"
   @@languages = ["EN", "FR"]
-  @@current_language = @@languages[0]
-
-  #--------------------------------------------------------------------------
-  # * Set language
-  #--------------------------------------------------------------------------
-  def self.set_language(lang)
-    @@current_language = @@languages.include?(lang) ? lang : @@current_language
-  end
+  @default_lang = @@languages[0]
+  $current_language = @default_lang
 
   #--------------------------------------------------------------------------
   # * Read a key from CSV file
@@ -48,7 +42,77 @@ class MultilingualSystem
   def self.read_key(table, key)
     file_path = ROOT_FOLDER + table + ".csv"
     csv_reader = CSVReader.new(file_path)
-    csv_reader.get_value(key, @@current_language)
+    csv_reader.get_value(key, $current_language)
+  end
+
+  #--------------------------------------------------------------------------
+  # * Set language
+  #--------------------------------------------------------------------------
+  def self.set_language(lang)
+    #Set language parameter
+    $current_language = @@languages.include?(lang) ? lang : $current_language
+    apply_translation
+    #Write in Game.ini
+    return unless @@languages.include?(lang)
+    lines = []
+    language_written = false
+    File.open("Game.ini", "r") do |file|
+      file.each_line do |line|
+        if line =~ /^Language=/
+          lines << "Language=#{lang}\n"
+          language_written = true
+        else
+          lines << line
+        end
+      end
+    end
+    lines << "Language=#{lang}\n" unless language_written
+    File.open("Game.ini", "w") do |file|
+      lines.each { |line| file.write(line) }
+    end
+    @@current_language = lang
+  end
+  
+  #--------------------------------------------------------------------------
+  # * Read language in Game.ini
+  #--------------------------------------------------------------------------
+  def self.read_ini_language
+    lang = nil
+    lines = []
+    found = false
+    File.readlines("Game.ini").each do |line|
+      if line =~ /^Language=(.+)$/i
+        lang = $1.strip
+        if @@languages.include?($1.strip) == false
+          lang = @default_lang
+        end
+        found = true
+      end
+      lines << line
+    end
+    unless found
+      lines << "Language=#{@default_lang}\n"
+      File.open("Game.ini", "w") { |f| f.puts lines }
+      lang = @default_lang
+    end
+    lang
+  end
+  
+  #--------------------------------------------------------------------------
+  # * Apply translation
+  #--------------------------------------------------------------------------
+  def self.apply_translation
+    #Apply translations to vocab
+    (0..7).each  { |i| Vocab.basic(i) }
+    (0..10).each { |i| Vocab.command(i) }
+    (12..22).each { |i| Vocab.command(i) }
+    Vocab.override_constants
+  end
+  
+  #
+  def self.first_initialize
+    $current_language = read_ini_language
+    apply_translation
   end
 end
 
@@ -112,22 +176,59 @@ module Vocab
     21 => "to_title",   22 => "cancel"
   }
   
-  VOCAB_DYNAMIC_METHODS = %w[
-    ShopBuy  ShopSell ShopCancel Possession
-    ExpTotal ExpNext
-    SaveMessage LoadMessage File
-    PartyName
-    Emerge Preemptive Surprise EscapeStart EscapeFailure
-    Victory Defeat ObtainExp ObtainGold ObtainItem LevelUp ObtainSkill
-    UseItem
-    CriticalToEnemy CriticalToActor
-    ActorDamage ActorRecovery ActorGain ActorLoss ActorDrain ActorNoDamage ActorNoHit
-    EnemyDamage EnemyRecovery EnemyGain EnemyLoss EnemyDrain  EnemyNoDamage EnemyNoHit
-    Evasion MagicEvasion MagicReflection CounterAttack Substitute
-    BuffAdd DebuffAdd BuffRemove
-    ActionFailure
-    PlayerPosError Eradicator EventOverflow
-  ]
+  VOCAB_DYNAMIC_CONSTANTS =
+  {
+    ShopBuy: "shop_buy",   ShopSell: "shop_sell",
+    ShopCancel: "shop_cancel",
+    Possession: "shop_possesion",
+    ExpTotal: "exp_total",
+    ExpNext: "exp_next",
+    SaveMessage: "save_message",
+    LoadMessage: "load_message",
+    File: "file",
+    PartyName: "party_name",
+    Emerge: "emerge",
+    Preemptive: "preepmtive",
+    Surprise: "suprise",
+    EscapeStart: "escape_start",
+    EscapeFailure: "escape_failure",
+    Victory: "victory",
+    Defeat: "defeat",
+    ObtainExp: "obtain_exp",
+    ObtainGold: "obtain_gold",
+    ObtainItem: "obtain_item",
+    LevelUp: "level_up",
+    ObtainSkill: "obtain_skill",
+    UseItem: "use_item",
+    CriticalToEnemy: "critical_to_enemy",
+    CriticalToActor: "critical_to_actor",
+    ActorDamage: "actor_damage",
+    ActorRecovery: "actor_recovery",
+    ActorGain: "actor_gain",
+    ActorLoss: "actor_loss",
+    ActorDrain: "actor_drain",
+    ActorNoDamage: "actor_no_damage",
+    ActorNoHit: "actor_no_hit",
+    EnemyDamage: "enemy_damage",
+    EnemyRecovery: "enemy_recovery",
+    EnemyGain: "enemy_gain",
+    EnemyLoss: "enemy_loss",
+    EnemyDrain: "enemy_drain",
+    EnemyNoDamage: "enemy_no_damage",
+    EnemyNoHit: "enemy_no_hit",
+    Evasion: "evasion",
+    MagicEvasion: "magic_evasion",
+    MagicReflection: "magic_reflection",
+    CounterAttack: "counter_attack",
+    Substitute: "substitute",
+    BuffAdd: "buff_add",
+    DebuffAdd: "debuf_add",
+    BuffRemove: "buff_remove",
+    ActionFailure: "action_failure",
+    PlayerPosError: "player_pos_error",
+    Eradicator: "eradicator",
+    EventOverflow: "event_overflow"
+  }
   
   #--------------------------------------------------------------------------
   # * Vocab reference
@@ -136,12 +237,6 @@ module Vocab
     #Basic and command
     alias_method :original_basic, :basic
     alias_method :original_command, :command
-    #Vocab dynamic methods
-    VOCAB_DYNAMIC_METHODS.each do |name|
-      define_method(name) do
-        MultilingualSystem.read_key("Vocab", name.downcase) || "Default_#{name}"
-      end
-    end
   end
 
   #--------------------------------------------------------------------------
@@ -163,20 +258,28 @@ module Vocab
     translation = MultilingualSystem.read_key("Vocab", key)
     translation.nil? ? original_command(command_id) : translation
   end
+  
+  #--------------------------------------------------------------------------
+  # * Override constants
+  #--------------------------------------------------------------------------
+  def self.override_constants
+    VOCAB_DYNAMIC_CONSTANTS.each do |const_name, key_name|
+      remove_const(const_name) if const_defined?(const_name)
+      translation = MultilingualSystem.read_key("Vocab", key_name) || "Default_#{const_name}"
+      const_set(const_name, translation)
+    end
+  end
 end
 
 #==============================================================================
-# * Scene Title modifier
+# * Scene Manager modifier
 #==============================================================================
-class Scene_Title
-  alias multilingual_start start
-
-  def start
-    multilingual_start
-    # Charge les vocabulaires traduits
-    Vocab::VOCAB_DYNAMIC_METHODS.each { |m| Vocab.send(m) }
-    0.upto(7)  { |i| Vocab.basic(i) }
-    (0..10).each { |i| Vocab.command(i) }
-    (12..22).each { |i| Vocab.command(i) }
+module SceneManager
+  class << self
+    alias multilingual_run run
+    def run
+      MultilingualSystem.first_initialize
+      multilingual_run
+    end
   end
 end
