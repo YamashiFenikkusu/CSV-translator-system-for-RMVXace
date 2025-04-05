@@ -1,13 +1,12 @@
 # RMVXace multilingual system - Translation tool
 <h2>Main thinks</h2>
-This script able your game to be multilingual. It's using csv file.<br/>
-A good comprehension of programmation and csv system are required.<br/>
+This script plug'n use able your game to be multilingual with using of csv file. A good comprehension of programmation and csv system are required.<br/>
 
 <h2>How to use:</h2>
--You need to have a **CSV** named folder in the project root.
--You have to put MultilingualSystem.init_language at the end of Main script.
--A CSV folder are offered on the GitHub page, it's containing a csv file for Vocab module. Files csv for actors, weapons will come later. The csv files offered on the Github page contain translation in English and French.
--For messages event comand and choice, use this format for display a message contained in a csv file: **(tableName, keyName)**
+-You need to have a <sub>CSV</sub> named folder in the project root.<br/>
+-You have to put MultilingualSystem.init_language at the end of Main script.<br/>
+-A CSV folder are offered on the GitHub page, it's containing a csv file for Vocab module. Files csv for actors, weapons will come later. The csv files offered on the Github page contain translation in English and French.<br/>
+-For messages event comand and choice, use this format for display a message contained in a csv file: <sub>(tableName, keyName)</sub>
 
 <h2>Revisions</h2>
 <h3>-v0.3</h3>
