@@ -1,7 +1,7 @@
 #==============================================================================
 # ** Multilingual System
 #------------------------------------------------------------------------------
-# ★ Yamashi Fenikkusu - v0.3
+# ★ Yamashi Fenikkusu - v0.4
 # https://github.com/YamashiFenikkusu/RMVXace-multilingual-system/tree/main
 #------------------------------------------------------------------------------
 # This script able your game to be multilingual by using csv file.
@@ -9,15 +9,15 @@
 #------------------------------------------------------------------------------
 # How to use:
 # -You need to have a "CSV" named folder in the project root.
-# -You have to put MultilingualSystem.init_language at the end of Main script.
 # -A CSV folder are offered on the GitHub page, it's containing a csv file for
 #  Vocab module. Files csv for actors, weapons will come later. The csv files
 #  offered on the Github page contain translation in English and French.
 # -For messages event comand and choice, use this format for display a message
 #  contained in a csv file: (tableName, keyName)
+# -You can parameter this script at the line 52.
 #==============================================================================
 # /!\ DISCLAIMER /!\
-# This script don't integrate AI translator, you've the charge of yours translations.
+# This script doesn't integrate AI translator, you've the charge of yours translations.
 #==============================================================================
 
 #==============================================================================
@@ -25,12 +25,12 @@
 #==============================================================================
 class MultilingualSystem
 	#--------------------------------------------------------------------------
-	# * Useful scripts commands
+	# * Useful script commands
 	#  -MultilingualSystem.read_key(tableName, keyName):
-	#     Read a key in a csv file
+	#     Read a key in a csv file.
 	#  -MultilingualSystem.set_language(desiredLanguage)
-	#			Set a new language. The desiredLanguage parameter must be same as the
-	#			one in @@languages array and csv files.
+	#     Set a new language. The desiredLanguage parameter must be same as the
+	#     one in @@languages array and csv files.
 	#  -MultilingualSystem.current_language
 	#     Return the current language.
 	#--------------------------------------------------------------------------
@@ -43,11 +43,21 @@ class MultilingualSystem
 	#     The default language of game.
 	#  -$current_language:
 	#     The current language of the game. By default, this variable is equal to @default_lang.
+	#  -@set_local_pictures_folder:
+	#     Set if the game loads pictures in an another language. You must have a
+	#     "PictureLANGINITIAL" folder in the Graphics folder.
+	#  -@set_local_title_folders:
+	#     Same utility as @set_local_pictures_folder for Titles1 and Title2.
+	#  -@set_local_movies_folder:
+	#     Same utility as @set_local_pictures_folder for Movies.
 	#--------------------------------------------------------------------------
 	ROOT_FOLDER = "CSV/"
 	@@languages = ["EN", "FR"]
 	@default_lang = @@languages[0]
 	$current_language = @default_lang
+	@set_local_pictures_folder = true
+	@set_local_title_folders = false
+	@set_local_movies_folder = true
 	
 	#--------------------------------------------------------------------------
 	# * Read a key from CSV file
@@ -114,22 +124,37 @@ class MultilingualSystem
 	#--------------------------------------------------------------------------
 	# * Current language
 	#--------------------------------------------------------------------------
-	def self.current_language
-		return $current_language
-	end
+	def self.current_language; return $current_language end
+	
+	#--------------------------------------------------------------------------
+	# * Return default language
+	#--------------------------------------------------------------------------
+	def self.default_language; return @default_lang end
+	
+	#--------------------------------------------------------------------------
+	# * Return local folders
+	#--------------------------------------------------------------------------
+	def self.return_set_local_pictures_folder; return @set_local_pictures_folder end
+	def self.return_set_local_title_folders; return @set_local_title_folders end
+	def self.return_set_local_movies_folder; return @set_local_movies_folder end
 	
 	#--------------------------------------------------------------------------
 	# * Apply translation
 	#--------------------------------------------------------------------------
 	def self.apply_translation
-		#Apply translations to vocab
+		#Vocab
 		(0..7).each  { |i| Vocab.basic(i) }
 		(0..10).each { |i| Vocab.command(i) }
 		(12..22).each { |i| Vocab.command(i) }
 		Vocab.override_constants
+		#Folder locations
+		Cache.set_local_folders
+		Game_Interpreter.set_local_folder
 	end
 	
-	#
+	#--------------------------------------------------------------------------
+	# * First initialize
+	#--------------------------------------------------------------------------
 	def self.first_initialize
 		$current_language = read_ini_language
 		apply_translation
@@ -254,7 +279,6 @@ module Vocab
 	# * Vocab reference
 	#--------------------------------------------------------------------------
 	class << self
-		#Basic and command
 		alias_method :original_basic, :basic
 		alias_method :original_command, :command
 	end
@@ -345,6 +369,84 @@ class Window_ChoiceList < Window_Command
 			end
 			add_command(result, :choice)
 		end
+	end
+end
+
+#==============================================================================
+# * Cache modifier
+#==============================================================================
+module Cache
+	@pictures_folder = ""
+	@title1_folder = ""
+	@title2_folder = ""
+	class << self
+		alias_method :multilingual_picture, :picture
+		alias_method :multilingual_title1, :title1
+		alias_method :multilingual_title2, :title2
+	end
+	
+	#--------------------------------------------------------------------------
+	# * Set local folders
+	#--------------------------------------------------------------------------
+	def self.set_local_folders
+		#Pictures folder
+		if MultilingualSystem.return_set_local_pictures_folder == true and MultilingualSystem.current_language != MultilingualSystem.default_language
+			@pictures_folder = "Graphics/Pictures"<<MultilingualSystem.current_language<<"/"
+		else
+			@pictures_folder = "Graphics/Pictures/"
+		end
+		#Title folders
+		if MultilingualSystem.return_set_local_title_folders == true and MultilingualSystem.current_language != MultilingualSystem.default_language
+			@title1_folder = "Graphics/Titles1"<<MultilingualSystem.current_language<<"/"
+			@title2_folder = "Graphics/Titles2"<<MultilingualSystem.current_language<<"/"
+		else
+			@title1_folder = "Graphics/Titles1/"
+			@title2_folder = "Graphics/Titles2/"
+		end
+	end
+	
+	#--------------------------------------------------------------------------
+	# * Override picture
+	#--------------------------------------------------------------------------
+	def self.picture(filename); load_bitmap(@pictures_folder, filename) end
+	
+	#--------------------------------------------------------------------------
+	# * Override title1
+	#--------------------------------------------------------------------------
+	def self.title1(filename); load_bitmap(@title1_folder, filename) end
+	
+	#--------------------------------------------------------------------------
+	# * Override title2
+	#--------------------------------------------------------------------------
+  def self.title2(filename); load_bitmap(@title2_folder, filename) end
+end
+
+#==============================================================================
+# * Game_Interpreter modifier
+#==============================================================================
+class Game_Interpreter
+	@@movies_folder = ''
+	alias multilingual_command_261 command_261
+	
+	#--------------------------------------------------------------------------
+	# * Set local movies folder
+	#--------------------------------------------------------------------------
+	def self.set_local_folder
+		if MultilingualSystem.return_set_local_movies_folder == true and MultilingualSystem.current_language != MultilingualSystem.default_language
+			@@movies_folder = 'Movies'<<MultilingualSystem.current_language<<'/'
+		else
+			@@movies_folder = 'Movies/'
+		end
+	end
+	
+	#--------------------------------------------------------------------------
+	# * Override command_261 ("Play movie" in the events commands)
+	#--------------------------------------------------------------------------
+	def command_261
+		Fiber.yield while $game_message.visible
+		Fiber.yield
+		name = @params[0]
+		Graphics.play_movie(@@movies_folder + name) unless name.empty?
 	end
 end
 
