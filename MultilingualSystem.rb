@@ -1,7 +1,7 @@
 #==============================================================================
 # ** Multilingual System
 #------------------------------------------------------------------------------
-# ★ Yamashi Fenikkusu - v0.4
+# ★ Yamashi Fenikkusu - v0.5
 # https://github.com/YamashiFenikkusu/RMVXace-multilingual-system/tree/main
 #------------------------------------------------------------------------------
 # This script able your game to be multilingual by using csv file.
@@ -14,7 +14,7 @@
 #  offered on the Github page contain translation in English and French.
 # -For messages event comand and choice, use this format for display a message
 #  contained in a csv file: (tableName, keyName)
-# -You can parameter this script at the line 52.
+# -You can parameter this script at the line 61 and read instruction at line 27.
 #==============================================================================
 # /!\ DISCLAIMER /!\
 # This script doesn't integrate AI translator, you've the charge of yours translations.
@@ -29,10 +29,17 @@ class MultilingualSystem
 	#  -MultilingualSystem.read_key(tableName, keyName):
 	#     Read a key in a csv file.
 	#  -MultilingualSystem.set_language(desiredLanguage)
-	#     Set a new language. The desiredLanguage parameter must be same as the
-	#     one in @@languages array and csv files.
+	#			Set a new language. The desiredLanguage parameter must be same as the
+	#			one in @@languages array and csv files.
 	#  -MultilingualSystem.current_language
 	#     Return the current language.
+	#--------------------------------------------------------------------------
+	# * Using in database
+	#  	-In the note part of an item, weapon or armor, you can add <key: something>
+	#    remplace "something" by a key present in your correspondant csv file (items
+	#    in /CSV/Items.csv, weapons in /CSV/Weapons.csv, etc). You have to
+	#    have 2 versions of the key in the csv fila: object and object_d
+	#    object is the name of the object and object_d the description.
 	#--------------------------------------------------------------------------
 	# * Variables
 	#  -ROOT_FOLDER:
@@ -44,12 +51,12 @@ class MultilingualSystem
 	#  -$current_language:
 	#     The current language of the game. By default, this variable is equal to @default_lang.
 	#  -@set_local_pictures_folder:
-	#     Set if the game loads pictures in an another language. You must have a
-	#     "PictureLANGINITIAL" folder in the Graphics folder.
+	#			Set if the game loads pictures in an another language. You must have a
+	#			"PictureLANGINITIAL" folder in the Graphics folder.
 	#  -@set_local_title_folders:
-	#     Same utility as @set_local_pictures_folder for Titles1 and Title2.
+	#			Same utility as @set_local_pictures_folder for Titles1 and Title2.
 	#  -@set_local_movies_folder:
-	#     Same utility as @set_local_pictures_folder for Movies.
+	#			Same utility as @set_local_pictures_folder for Movies.
 	#--------------------------------------------------------------------------
 	ROOT_FOLDER = "CSV/"
 	@@languages = ["EN", "FR"]
@@ -448,6 +455,87 @@ class Game_Interpreter
 		name = @params[0]
 		Graphics.play_movie(@@movies_folder + name) unless name.empty?
 	end
+end
+
+#==============================================================================
+# * RPG::Item modifier
+#==============================================================================
+class RPG::Item
+  def translation_key
+    if @translation_key.nil?
+      note.match(/<key:\s*(\w+)>/i)
+      @translation_key = $1 || "item_#{@id}"
+    end
+    @translation_key
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override name
+	#--------------------------------------------------------------------------
+  def name
+    MultilingualSystem.read_key("Items", translation_key) || @name
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override description
+	#--------------------------------------------------------------------------
+  def description
+    MultilingualSystem.read_key("Items", "#{translation_key}_d") || @description
+  end
+end
+
+#==============================================================================
+# * RPG::Weapon modifier
+#==============================================================================
+class RPG::Weapon
+  def translation_key
+    if @translation_key.nil?
+      note.match(/<key:\s*(\w+)>/i)
+      @translation_key = $1 || "item_#{@id}"
+    end
+    @translation_key
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override name
+	#--------------------------------------------------------------------------
+  def name
+    MultilingualSystem.read_key("Weapons", translation_key) || @name
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override description
+	#--------------------------------------------------------------------------
+  def description
+    MultilingualSystem.read_key("Weapons", "#{translation_key}_d") || @description
+  end
+end
+
+#==============================================================================
+# * RPG::Armor modifier
+#==============================================================================
+class RPG::Armor
+  def translation_key
+    if @translation_key.nil?
+      note.match(/<key:\s*(\w+)>/i)
+      @translation_key = $1 || "item_#{@id}"
+    end
+    @translation_key
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override name
+	#--------------------------------------------------------------------------
+  def name
+    MultilingualSystem.read_key("Armors", translation_key) || @name
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override description
+	#--------------------------------------------------------------------------
+  def description
+    MultilingualSystem.read_key("Armors", "#{translation_key}_d") || @description
+  end
 end
 
 #==============================================================================
