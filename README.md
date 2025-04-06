@@ -9,8 +9,10 @@ This script plug'n use able your game to be multilingual with using of csv file.
 -For messages event comand and choice, use this format for display a message contained in a csv file: <sub>(tableName, keyName)</sub>
 
 <h2>Revisions</h2>
+<h3>-v0.5</h3>
+-Add translation system for items, weapons and armors in the database, details in the script.<br/>
 <h3>-v0.4</h3>
--Folders "Graphics/Pictures", "Graphics/Title1", "Graphics/Title2" and "Movie" can be cahnged depending of language of the game.
+-Folders "Graphics/Pictures", "Graphics/Title1", "Graphics/Title2" and "Movie" can be cahnged depending of language of the game.<br/>
 <h3>-v0.3</h3>
 -Add method for translate events messages.<br/>
 -Add method for translate events choices list.<br/>
