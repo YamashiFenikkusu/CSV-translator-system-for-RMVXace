@@ -1,4 +1,4 @@
-# RMVXace multilingual system - Translation tool
+# CSV translator system for RPG Maker VXace
 <h2>Main thinks</h2>
 This script plug'n use able your game to be multilingual with using of csv file. A good comprehension of programmation and csv system are required.<br/>
 
