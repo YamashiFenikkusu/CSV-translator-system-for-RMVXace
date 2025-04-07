@@ -1,7 +1,7 @@
 #==============================================================================
 # ** Multilingual System
 #------------------------------------------------------------------------------
-# ★ Yamashi Fenikkusu - v0.5
+# ★ Yamashi Fenikkusu - v0.6
 # https://github.com/YamashiFenikkusu/RMVXace-multilingual-system/tree/main
 #------------------------------------------------------------------------------
 # This script able your game to be multilingual by using csv file.
@@ -14,6 +14,7 @@
 #  offered on the Github page contain translation in English and French.
 # -For messages event comand and choice, use this format for display a message
 #  contained in a csv file: (tableName, keyName)
+# -For linebreak in the csv files, use the \L balise.
 # -You can parameter this script at the line 61 and read instruction at line 27.
 #==============================================================================
 # /!\ DISCLAIMER /!\
@@ -72,7 +73,10 @@ class MultilingualSystem
 	def self.read_key(table, key)
 		file_path = ROOT_FOLDER + table + ".csv"
 		csv_reader = CSVReader.new(file_path)
-		csv_reader.get_value(key, $current_language)
+		value = csv_reader.get_value(key, $current_language)
+		#Linebreak gestion
+    value = value.gsub(/\\[lL]/, "\n") if value.is_a?(String)
+    value
 	end
 	
 	#--------------------------------------------------------------------------
@@ -120,6 +124,7 @@ class MultilingualSystem
 			end
 			lines << line
 		end
+		#Add Language=XX if this line doesn't exist
 		unless found
 			lines << "Language=#{@default_lang}\n"
 			File.open("Game.ini", "w") { |f| f.puts lines }
@@ -219,6 +224,12 @@ module Vocab
 		5 => "mp_a",   6 => "tp",   7 => "tp_a"
 	}
 	
+	VOCAB_KEY_ETYPE =
+	{
+		0 => "weapon2",   1 => "shield",   2 => "helmet",   3 => "armor",
+		4 => "accessory"
+	}
+	
 	VOCAB_KEY_COMMAND =
 	{
 		0 => "fight",   1 => "escape",   2 => "attack",   3 => "guard",   4 => "item",
@@ -287,6 +298,7 @@ module Vocab
 	#--------------------------------------------------------------------------
 	class << self
 		alias_method :original_basic, :basic
+		alias_method :original_etype, :etype
 		alias_method :original_command, :command
 	end
 	
@@ -296,9 +308,19 @@ module Vocab
 	def self.basic(basic_id)
 		key = VOCAB_KEY_BASIC[basic_id]
 		return original_basic(basic_id) unless key
-		translation = MultilingualSystem.read_key("Vocab", key)
+		translation = MultilingualSystem.read_key("Database_Vocab", key)
 		translation.nil? ? original_basic(basic_id) : translation
 	end
+	
+	#--------------------------------------------------------------------------
+	# * Override etype
+	#--------------------------------------------------------------------------
+	def self.etype(etype_id)
+		key = VOCAB_KEY_ETYPE[etype_id]
+		return original_command(etype_id) unless key
+		translation = MultilingualSystem.read_key("Database_Vocab", key)
+		translation.nil? ? original_command(etype_id) : translation
+  end
 	
 	#--------------------------------------------------------------------------
 	# * Override command
@@ -306,7 +328,7 @@ module Vocab
 	def self.command(command_id)
 		key = VOCAB_KEY_COMMAND[command_id]
 		return original_command(command_id) unless key
-		translation = MultilingualSystem.read_key("Vocab", key)
+		translation = MultilingualSystem.read_key("Database_Vocab", key)
 		translation.nil? ? original_command(command_id) : translation
 	end
 	
@@ -316,7 +338,7 @@ module Vocab
 	def self.override_constants
 		VOCAB_DYNAMIC_CONSTANTS.each do |const_name, key_name|
 			remove_const(const_name) if const_defined?(const_name)
-			translation = MultilingualSystem.read_key("Vocab", key_name) || "Default_#{const_name}"
+			translation = MultilingualSystem.read_key("Database_Vocab", key_name) || "Default_#{const_name}"
 			const_set(const_name, translation)
 		end
 	end
@@ -332,22 +354,25 @@ class Game_Message
 	# * Override add
 	#--------------------------------------------------------------------------
 	def add(text)
-		result = text
-		if text.is_a?(String) && text.strip.start_with?("(") && text.strip.end_with?(")")
-			begin
-				inner = text.strip[1..-2].strip
-				parts = inner.split(",").map { |s| s.strip.gsub(/^["']|["']$/, "") }
-				if parts.size == 2
-					table, key = parts
-					translated = MultilingualSystem.read_key(table, key)
-					result = translated || "#{table}.#{key}"
-				end
-			rescue => e
-				result = "[ERROR: Translation failed]"
-			end
-		end
-		multilingual_add(result)
-	end
+		#Reading
+    result = text
+    if text.is_a?(String) && text.strip.start_with?("(") && text.strip.end_with?(")")
+      begin
+        inner = text.strip[1..-2].strip
+        parts = inner.split(",").map { |s| s.strip.gsub(/^["']|["']$/, "") }
+        if parts.size == 2
+          table, key = parts
+          translated = MultilingualSystem.read_key(table, key)
+          result = translated || "#{table}.#{key}"
+        end
+      rescue => e
+        result = "[ERROR: Translation failed]"
+      end
+    end
+		#Linebreak
+    result = result.gsub(/\\L/i, "\n") if result.is_a?(String)
+    multilingual_add(result)
+  end
 end
 
 #==============================================================================
@@ -458,9 +483,12 @@ class Game_Interpreter
 end
 
 #==============================================================================
-# * RPG::Item modifier
+# * RPG::Armor modifier
 #==============================================================================
-class RPG::Item
+class RPG::Actor
+	#--------------------------------------------------------------------------
+	# * Check if translation key isn't empty
+	#--------------------------------------------------------------------------
   def translation_key
     if @translation_key.nil?
       note.match(/<key:\s*(\w+)>/i)
@@ -473,14 +501,51 @@ class RPG::Item
 	# * Override name
 	#--------------------------------------------------------------------------
   def name
-    MultilingualSystem.read_key("Items", translation_key) || @name
+    MultilingualSystem.read_key("Database_Actors", translation_key) || @name
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override nickname
+	#--------------------------------------------------------------------------
+  def nickname
+    MultilingualSystem.read_key("Database_Actors", "#{translation_key}_n") || @nickname
   end
 	
 	#--------------------------------------------------------------------------
 	# * Override description
 	#--------------------------------------------------------------------------
   def description
-    MultilingualSystem.read_key("Items", "#{translation_key}_d") || @description
+    MultilingualSystem.read_key("Database_Actors", "#{translation_key}_d") || @description
+  end
+end
+
+#==============================================================================
+# * RPG::Item modifier
+#==============================================================================
+class RPG::Item
+	#--------------------------------------------------------------------------
+	# * Check if translation key isn't empty
+	#--------------------------------------------------------------------------
+  def translation_key
+    if @translation_key.nil?
+      note.match(/<key:\s*(\w+)>/i)
+      @translation_key = $1 || "item_#{@id}"
+    end
+    @translation_key
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override name
+	#--------------------------------------------------------------------------
+  def name
+    MultilingualSystem.read_key("Database_Items", translation_key) || @name
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override description
+	#--------------------------------------------------------------------------
+  def description
+    MultilingualSystem.read_key("Database_Items", "#{translation_key}_d") || @description
   end
 end
 
@@ -488,6 +553,9 @@ end
 # * RPG::Weapon modifier
 #==============================================================================
 class RPG::Weapon
+	#--------------------------------------------------------------------------
+	# * Check if translation key isn't empty
+	#--------------------------------------------------------------------------
   def translation_key
     if @translation_key.nil?
       note.match(/<key:\s*(\w+)>/i)
@@ -500,14 +568,14 @@ class RPG::Weapon
 	# * Override name
 	#--------------------------------------------------------------------------
   def name
-    MultilingualSystem.read_key("Weapons", translation_key) || @name
+    MultilingualSystem.read_key("Database_Weapons", translation_key) || @name
   end
 	
 	#--------------------------------------------------------------------------
 	# * Override description
 	#--------------------------------------------------------------------------
   def description
-    MultilingualSystem.read_key("Weapons", "#{translation_key}_d") || @description
+    MultilingualSystem.read_key("Database_Weapons", "#{translation_key}_d") || @description
   end
 end
 
@@ -515,6 +583,9 @@ end
 # * RPG::Armor modifier
 #==============================================================================
 class RPG::Armor
+	#--------------------------------------------------------------------------
+	# * Check if translation key isn't empty
+	#--------------------------------------------------------------------------
   def translation_key
     if @translation_key.nil?
       note.match(/<key:\s*(\w+)>/i)
@@ -527,14 +598,81 @@ class RPG::Armor
 	# * Override name
 	#--------------------------------------------------------------------------
   def name
-    MultilingualSystem.read_key("Armors", translation_key) || @name
+    MultilingualSystem.read_key("Database_Armors", translation_key) || @name
   end
 	
 	#--------------------------------------------------------------------------
 	# * Override description
 	#--------------------------------------------------------------------------
   def description
-    MultilingualSystem.read_key("Armors", "#{translation_key}_d") || @description
+    MultilingualSystem.read_key("Database_Armors", "#{translation_key}_d") || @description
+  end
+end
+
+#==============================================================================
+# * RPG::Armor modifier
+#==============================================================================
+class RPG::Skill
+	#--------------------------------------------------------------------------
+	# * Check if translation key isn't empty
+	#--------------------------------------------------------------------------
+  def translation_key
+    if @translation_key.nil?
+			note.match(/<key:\s*(\w+)>/i)
+			@translation_key = $1 || "item_#{@id}"
+    end
+    @translation_key
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override name
+	#--------------------------------------------------------------------------
+  def name
+    MultilingualSystem.read_key("Database_Skills", translation_key) || @name
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override description
+	#--------------------------------------------------------------------------
+  def description
+    MultilingualSystem.read_key("Database_Skills", "#{translation_key}_d") || @description
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override message1
+	#--------------------------------------------------------------------------
+  def message1
+    MultilingualSystem.read_key("Database_Skills", "#{translation_key}_m") || @message1
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Erase message2
+	#--------------------------------------------------------------------------
+  def message2
+    @message2 = ""
+  end
+end
+
+#==============================================================================
+# * RPG::Class modifier
+#==============================================================================
+class RPG::Class
+	#--------------------------------------------------------------------------
+	# * Check if translation key isn't empty, used for database
+	#--------------------------------------------------------------------------
+  def translation_key
+    if @translation_key.nil?
+      note.match(/<key:\s*(\w+)>/i)
+      @translation_key = $1 || "item_#{@id}"
+    end
+    @translation_key
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override name
+	#--------------------------------------------------------------------------
+  def name
+    MultilingualSystem.read_key("Database_Class", translation_key) || @name
   end
 end
 
