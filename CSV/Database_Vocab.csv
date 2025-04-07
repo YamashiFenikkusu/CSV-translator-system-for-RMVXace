@@ -1,0 +1,87 @@
+﻿Key,EN,FR
+level,Level,Niveau
+level_a,Lv.,Niv.
+hp,Health points,Points de vie
+hp_a,HP,PV
+mp,Mana,Mana
+mp_a,MP,PM
+tp,Tech points,Points techniques
+tp_a,TP,PT
+fight,Fight,Combattre
+escape,Escape,Fuir
+attack,Attack,Attaquer
+guard,Guard,Défense
+item,Item,Objet
+skill,Skill,Compétence
+equip,Equip,Équiper
+status,Status,Statut
+formation,Formation,Formation
+save,Save,Sauvegarder
+game_end,Game end,Quitter
+weapon,Weapon,Arme
+armor,Armor,Armure
+key_item,Key item,Objet clé
+equip2,Equip,Équiper
+optimize,Optimize,Optimiser
+clear,Clear,Retirer
+new_game,New game,Nouvelle partie
+continue,Continue,Continuer
+shutdown,Shut down,Quitter
+to_title,Title screen,Écran titre
+cancel,Cancel,Annuler
+shop_buy,Buy,Acheter
+shop_sell,Sell,Vendre
+shop_cancel,Cancel,Annuler
+shop_possesion,In possesion,En possesion
+exp_total,Total exp.,Exp. Totale
+exp_next,Next %s,%s suivant
+save_message,Save in which file?,Sauvegarder dans quel fichier ?
+load_message,Load in which file?,Charger quelle partie ?
+file,File,Fichier
+party_name,%s’s party,Équipe de %s
+emerge,%s wants to fight !,%s apparaît !
+preemptive,%s token advantage!,%s a pris l'avantage !
+surprise,%s is surprised!,%s s'est fait surprendre !
+escape_start,%s is escaping!,%s fuit !
+escape_failure,The escape tentative fails!,La tentative de fuite a échoué !
+victory,%s won!,%s a gagné !
+defeat,%s lost…,%s a perdu...
+obtain_exp,%s experience points received!,%s points d'expérience reçus !
+obtain_gold,%s\\G received!,%s\\G trouvés !
+obtain_item,%s received!,%s trouvé !
+level_up,%s is now %s %s!,%s est maintenant %s %s!
+obtain_skill,%s learned!,%s appris !
+use_item,%s uses %s!,%s utilise %s!
+critical_to_enemy,What a critical hit!,Un joli coup !
+critical_to_actor,What a painful hit!,Un coup douloureux !
+actor_damage,%s toke %s damages!,%s a reçu %s dégâts !
+actor_recovery,%s recovered %s %s!,%s a récupéré %s %s !
+actor_gain,%s gets %s %s!,%s gagne %s %s!
+actor_loss,%s loses %s %s!,%s perd %s %s!
+actor_drain,%s was drained of %s %s!,%s a été drainé de %s %s !
+actor_no_damage,%s didn't feel anything!,%s n'a rien senti !
+actor_no_hit,Failed! %s took no damage!,Raté ! %s n'a pris aucun dégât !
+enemy_damage,%s toke %s damages!,%s a reçu %s dégâts !
+enemy_recovery,%s recovered %s %s!,%s a récupéré %s %s !
+enemy_gain,%s gets %s %s!,%s gagne %s %s!
+enemy_loss,%s loses %s %s!,%s perd %s %s!
+enemy_drain,%s has been drained of %s %s!,%s a été drainé de %s %s !
+enemy_no_damage,%s didn't feel anything!,%s n'a rien senti !
+enemy_no_hit,Failed! %s took no damage!,Raté ! %s n'a pris aucun dégât !
+evasion,%s has esquived the attack !,%s a esquivé l'attaque !
+magic_evasion,%s countered the magic!,%s a contré la magie !
+magic_reflection,%s reflected the magic,%s a renvoyé la magie !
+counter_attack,%s counterattacks!,"""%s contre-attaque !"
+substitute,%s is defending%s!,%s protège %s !
+buff_add,%2$s de %1$s is rising!,%2$s de %1$s augmente !
+debuff_add,%2$s de %1$s is decreasing!,%2$s de %1$s diminue !
+buff_remove,%2$s of %1$s has returned to normal.,%2$s de %1$s est revenu à la normale.
+action_failure,No effect on %s! ,Aucun effet sur %s!
+player_pos_error,"Delfaut position not defined,",La position de départ de l'équipe n'est pas définie.
+eradicator,An error occured,Une erreur est survenue.
+event_overflow,Maximum number of common event calls reached.,Nombre maximum d'appels d'évènement commun atteint.
+weapon2,Weapon,Arme
+helmet,Helmet,Casque
+accessory,Accessory,Accessoire
+shield,Shield,Bouclier
+armor,Armor,Armure
