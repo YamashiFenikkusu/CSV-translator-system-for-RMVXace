@@ -1,7 +1,7 @@
 #==============================================================================
 # ** Multilingual System
 #------------------------------------------------------------------------------
-# ★ Yamashi Fenikkusu - v0.7
+# ★ Yamashi Fenikkusu - v0.7.5
 # https://github.com/YamashiFenikkusu/RMVXace-multilingual-system/tree/main
 #------------------------------------------------------------------------------
 # This script able your game to be multilingual by using csv file.
@@ -250,10 +250,6 @@ module Vocab
 		21 => "to_title",   22 => "cancel"
 	}
 	
-	VOCAB_SKILL_TYPE = ["skilltype_special", "skilltype_magic"]
-	
-	$vocab_original_skill_types = []
-	
 	VOCAB_DYNAMIC_CONSTANTS =
 	{
 		ShopBuy: "shop_buy",
@@ -308,7 +304,9 @@ module Vocab
 		Eradicator: "eradicator",
 		EventOverflow: "event_overflow"
 	}
-		
+	
+	$vocab_skill_types_keys = []
+	
 	#--------------------------------------------------------------------------
 	# * Vocab reference
 	#--------------------------------------------------------------------------
@@ -374,9 +372,9 @@ module Vocab
 	# * Override skill type
 	#--------------------------------------------------------------------------
 	def self.override_skill_type
-		keys = [""]
-		for n in 0..VOCAB_SKILL_TYPE.size
-			translation = MultilingualSystem.read_key("Database_Vocab", VOCAB_SKILL_TYPE[n])
+		keys = []
+		for n in 0..$vocab_skill_types_keys.size
+			translation = MultilingualSystem.read_key("Database_Vocab", $vocab_skill_types_keys[n])
 			keys << translation
 		end
 		$data_system.skill_types = keys
@@ -496,7 +494,7 @@ end
 # * Game_Interpreter modifier
 #==============================================================================
 class Game_Interpreter
-	@@movies_folder = ''
+	@@movies_folder = ""
 	alias multilingual_command_261 command_261
 	
 	#--------------------------------------------------------------------------
@@ -504,9 +502,9 @@ class Game_Interpreter
 	#--------------------------------------------------------------------------
 	def self.set_local_folder
 		if MultilingualSystem.return_set_local_movies_folder == true and MultilingualSystem.current_language != MultilingualSystem.default_language
-			@@movies_folder = 'Movies'<<MultilingualSystem.current_language<<'/'
+			@@movies_folder = "Movies"<<MultilingualSystem.current_language<<"/"
 		else
-			@@movies_folder = 'Movies/'
+			@@movies_folder = "Movies/"
 		end
 	end
 	
@@ -817,7 +815,7 @@ class Scene_Title
 	#--------------------------------------------------------------------------
   def start
     multilingual_start
-		$vocab_original_skill_types = $data_system.skill_types
+		$vocab_skill_types_keys = $data_system.skill_types
     Vocab.override_skill_type
   end
 end
