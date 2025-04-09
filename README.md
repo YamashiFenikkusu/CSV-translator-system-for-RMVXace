@@ -4,11 +4,13 @@ This script plug'n use able your game to be multilingual with using of csv file.
 
 <h2>How to use:</h2>
 -You need to have a <b>CSV</b> named folder in the project root.<br/>
--You have to put MultilingualSystem.init_language at the end of Main script.<br/>
 -A CSV folder are offered on the GitHub page, it's containing a csv file for Vocab module. Files csv for actors, weapons will come later. The csv files offered on the Github page contain translation in English and French.<br/>
 -For messages event comand and choice, use this format for display a message contained in a csv file: <b>(tableName, keyName)</b>
 
 <h2>Revisions</h2>
+<h3>-v0.7</h3>
+-Finish translation of Vocab module.<br/>
+-Add translation system for skill types, enemies and states<br/>
 <h3>-v0.6</h3>
 -Add translation system for skills, same technique as item, weapons and armor.<br/>
 -Add <b></b>\L</b> balise for fixing breakline bug for message and descriptions of objects in the database.<br/>
