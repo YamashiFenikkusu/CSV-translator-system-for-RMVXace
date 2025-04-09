@@ -1,4 +1,4 @@
-﻿Key,EN,FR
+Key,EN,FR
 level,Level,Niveau
 level_a,Lv.,Niv.
 hp,Health points,Points de vie
@@ -85,3 +85,13 @@ helmet,Helmet,Casque
 accessory,Accessory,Accessoire
 shield,Shield,Bouclier
 armor,Armor,Armure
+maxHitPoints,Max hit points,Points d’attaques max
+maxMagicPoints,Max magic points,Points Mana max
+attackPower,Attack,Attaque
+defensePower,Defense,Défense
+magicAttackPower,Magic attack,Attaque Mana
+magicDefensePower,Magic defense,Défense Mana
+agility,Agility,Agilité
+luck,Luck,Chance
+skilltype_special,Special,Spéciales
+skilltype_magic,Magic,Magie
