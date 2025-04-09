@@ -1,7 +1,7 @@
 #==============================================================================
 # ** Multilingual System
 #------------------------------------------------------------------------------
-# ★ Yamashi Fenikkusu - v0.6
+# ★ Yamashi Fenikkusu - v0.7
 # https://github.com/YamashiFenikkusu/RMVXace-multilingual-system/tree/main
 #------------------------------------------------------------------------------
 # This script able your game to be multilingual by using csv file.
@@ -14,8 +14,8 @@
 #  offered on the Github page contain translation in English and French.
 # -For messages event comand and choice, use this format for display a message
 #  contained in a csv file: (tableName, keyName)
-# -For linebreak in the csv files, use the \L balise.
-# -You can parameter this script at the line 61 and read instruction at line 27.
+# -For linebreak in the csv files for messages and database, use the \L balise.
+# -You can parameter this script at the line 65 and read instruction at line 28.
 #==============================================================================
 # /!\ DISCLAIMER /!\
 # This script doesn't integrate AI translator, you've the charge of yours translations.
@@ -27,9 +27,9 @@
 class MultilingualSystem
 	#--------------------------------------------------------------------------
 	# * Useful script commands
-	#  -MultilingualSystem.read_key(tableName, keyName):
+	#  -MultilingualSystem.read_key("tableName", "keyName"):
 	#     Read a key in a csv file.
-	#  -MultilingualSystem.set_language(desiredLanguage)
+	#  -MultilingualSystem.set_language("desiredLanguage")
 	#			Set a new language. The desiredLanguage parameter must be same as the
 	#			one in @@languages array and csv files.
 	#  -MultilingualSystem.current_language
@@ -39,18 +39,21 @@ class MultilingualSystem
 	#  	-In the note part of an item, weapon or armor, you can add <key: something>
 	#    remplace "something" by a key present in your correspondant csv file (items
 	#    in /CSV/Items.csv, weapons in /CSV/Weapons.csv, etc). You have to
-	#    have 2 versions of the key in the csv fila: object and object_d
-	#    object is the name of the object and object_d the description.
+	#    have multiple versions of the key in the csv file: object, object_d, object_m.
+	#    object is the name of the object and object_d (or other prefix) the
+	#    description or displayed message.
 	#--------------------------------------------------------------------------
 	# * Variables
 	#  -ROOT_FOLDER:
 	#     The folder where csv files are located. By delfaut in the project root.
 	#  -@@languages:
-	#     The languages of the game. The headers keys must be the same as the keys in the array.
+	#     The languages of the game. The headers keys must be the same as the keys
+	#     in the array.
 	#  -@default_lang:
 	#     The default language of game.
 	#  -$current_language:
-	#     The current language of the game. By default, this variable is equal to @default_lang.
+	#     The current language of the game. By default, this variable is equal to
+	#     @default_lang.
 	#  -@set_local_pictures_folder:
 	#			Set if the game loads pictures in an another language. You must have a
 	#			"PictureLANGINITIAL" folder in the Graphics folder.
@@ -86,6 +89,7 @@ class MultilingualSystem
 		#Set language parameter
 		$current_language = @@languages.include?(lang) ? lang : $current_language
 		apply_translation
+		Vocab.override_skill_type
 		#Write in Game.ini
 		return unless @@languages.include?(lang)
 		lines = []
@@ -217,11 +221,18 @@ end
 module Vocab
 	#--------------------------------------------------------------------------
 	# * Constants
-	#--------------------------------------------------------------------------
+	#--------------------------------------------------------------------------	
 	VOCAB_KEY_BASIC =
 	{
 		0 => "level",   1 => "level_a",   2 => "hp",   3 => "hp_a",   4 => "mp",
 		5 => "mp_a",   6 => "tp",   7 => "tp_a"
+	}
+	
+	VOCAB_KEY_PARAM =
+	{
+		0 => "maxHitPoints",   1 => "maxMagicPoints",   2 => "attackPower",
+		3 => "defensePower",   4 => "magicAttackPower",   5 => "magicDefensePower",
+		6 => "agility",   7=> "luck"
 	}
 	
 	VOCAB_KEY_ETYPE =
@@ -239,9 +250,14 @@ module Vocab
 		21 => "to_title",   22 => "cancel"
 	}
 	
+	VOCAB_SKILL_TYPE = ["skilltype_special", "skilltype_magic"]
+	
+	$vocab_original_skill_types = []
+	
 	VOCAB_DYNAMIC_CONSTANTS =
 	{
-		ShopBuy: "shop_buy",   ShopSell: "shop_sell",
+		ShopBuy: "shop_buy",
+		ShopSell: "shop_sell",
 		ShopCancel: "shop_cancel",
 		Possession: "shop_possesion",
 		ExpTotal: "exp_total",
@@ -292,7 +308,7 @@ module Vocab
 		Eradicator: "eradicator",
 		EventOverflow: "event_overflow"
 	}
-	
+		
 	#--------------------------------------------------------------------------
 	# * Vocab reference
 	#--------------------------------------------------------------------------
@@ -300,6 +316,7 @@ module Vocab
 		alias_method :original_basic, :basic
 		alias_method :original_etype, :etype
 		alias_method :original_command, :command
+		alias_method :original_command, :param
 	end
 	
 	#--------------------------------------------------------------------------
@@ -333,6 +350,16 @@ module Vocab
 	end
 	
 	#--------------------------------------------------------------------------
+	# * Override param
+	#--------------------------------------------------------------------------
+	def self.param(param_id)
+		key = VOCAB_KEY_PARAM[param_id]
+		return original_command(param_id) unless key
+		translation = MultilingualSystem.read_key("Database_Vocab", key)
+		translation.nil? ? original_command(param_id) : translation
+	end
+	
+	#--------------------------------------------------------------------------
 	# * Override constants
 	#--------------------------------------------------------------------------
 	def self.override_constants
@@ -341,6 +368,18 @@ module Vocab
 			translation = MultilingualSystem.read_key("Database_Vocab", key_name) || "Default_#{const_name}"
 			const_set(const_name, translation)
 		end
+	end
+	
+	#--------------------------------------------------------------------------
+	# * Override skill type
+	#--------------------------------------------------------------------------
+	def self.override_skill_type
+		keys = [""]
+		for n in 0..VOCAB_SKILL_TYPE.size
+			translation = MultilingualSystem.read_key("Database_Vocab", VOCAB_SKILL_TYPE[n])
+			keys << translation
+		end
+		$data_system.skill_types = keys
 	end
 end
 
@@ -483,7 +522,7 @@ class Game_Interpreter
 end
 
 #==============================================================================
-# * RPG::Armor modifier
+# * RPG::Actor modifier
 #==============================================================================
 class RPG::Actor
 	#--------------------------------------------------------------------------
@@ -516,6 +555,29 @@ class RPG::Actor
 	#--------------------------------------------------------------------------
   def description
     MultilingualSystem.read_key("Database_Actors", "#{translation_key}_d") || @description
+  end
+end
+
+#==============================================================================
+# * RPG::Enemy modifier
+#==============================================================================
+class RPG::Enemy
+	#--------------------------------------------------------------------------
+	# * Check if translation key isn't empty, used for database
+	#--------------------------------------------------------------------------
+  def translation_key
+    if @translation_key.nil?
+      note.match(/<key:\s*(\w+)>/i)
+      @translation_key = $1 || "item_#{@id}"
+    end
+    @translation_key
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override name
+	#--------------------------------------------------------------------------
+  def name
+    MultilingualSystem.read_key("Database_Enemies", translation_key) || @name
   end
 end
 
@@ -610,7 +672,7 @@ class RPG::Armor
 end
 
 #==============================================================================
-# * RPG::Armor modifier
+# * RPG::Skill modifier
 #==============================================================================
 class RPG::Skill
 	#--------------------------------------------------------------------------
@@ -646,10 +708,61 @@ class RPG::Skill
   end
 	
 	#--------------------------------------------------------------------------
-	# * Erase message2
+	# * Override message2
 	#--------------------------------------------------------------------------
   def message2
-    @message2 = ""
+    MultilingualSystem.read_key("Database_Skills", "#{translation_key}_m2") || @message2
+  end
+end
+
+#==============================================================================
+# * RPG::State modifier
+#==============================================================================
+class RPG::State
+	#--------------------------------------------------------------------------
+	# * Check if translation key isn't empty
+	#--------------------------------------------------------------------------
+  def translation_key
+    if @translation_key.nil?
+			note.match(/<key:\s*(\w+)>/i)
+			@translation_key = $1 || "item_#{@id}"
+    end
+    @translation_key
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override name
+	#--------------------------------------------------------------------------
+  def name
+    MultilingualSystem.read_key("Database_States", translation_key) || @name
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override message1
+	#--------------------------------------------------------------------------
+  def message1
+    MultilingualSystem.read_key("Database_States", "#{translation_key}_ally") || @message1
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override message2
+	#--------------------------------------------------------------------------
+  def message2
+    MultilingualSystem.read_key("Database_States", "#{translation_key}_enemy") || @message2
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override message3
+	#--------------------------------------------------------------------------
+  def message3
+    MultilingualSystem.read_key("Database_States", "#{translation_key}_stay") || @message3
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override message4
+	#--------------------------------------------------------------------------
+  def message4
+    MultilingualSystem.read_key("Database_States", "#{translation_key}_debuff") || @message4
   end
 end
 
@@ -691,4 +804,20 @@ module SceneManager
 			multilingual_run
 		end
 	end
+end
+
+#==============================================================================
+# * Scene Title modifier
+#==============================================================================
+class Scene_Title
+  alias multilingual_start start
+	
+	#--------------------------------------------------------------------------
+	# * Override start
+	#--------------------------------------------------------------------------
+  def start
+    multilingual_start
+		$vocab_original_skill_types = $data_system.skill_types
+    Vocab.override_skill_type
+  end
 end
