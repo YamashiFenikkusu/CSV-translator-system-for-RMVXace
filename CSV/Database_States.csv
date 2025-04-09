@@ -1,0 +1,31 @@
+﻿Key,EN,FR
+dead,Dead,Mort
+dead_ally, is dead!, est tombé au combat !
+dead_enemy, is defeated!, est vaincu !
+dead_stay,,
+dead_debuff, resurrects, revient à la vie !
+poisoned,Poisoned,Empoisonné
+poisoned_ally, is poisoned!, est empoisonné !
+poisoned_enemy, is poisoned!, est empoisonné !
+poisoned_stay,,
+poisoned_debuff, is cured of the poison, est guéri du poison.
+blind,Blind,Aveugle
+blind_ally, decomes blind!, est devenu aveugle !
+blind_enemy, decomes blind!, est devenu aveugle !
+blind_stay,,
+blind_debuff, regains sight!, retrouve la vue !
+mute,Mute,Muet
+mute_ally, becomes mute!, est devenu muet !
+mute_enemy, becomes mute!, est devenu muet !
+mute_stay,,
+mute_debuff,  finds voice again!, retrouve la voix !
+confused,Confused,Confus
+confused_ally, becomes confused!, est devenu confus !
+confused_enemy, becomes confused!, est devenu confus !
+confused_stay, is still confused !, est toujours confus !
+confused_debuff, comes to his senses., retrouve ses esprits !
+sleep,Sleep,Endormie
+sleep_ally, fell asleep!, s’est endormie !
+sleep_enemy, fell asleep!, s’est endormie !
+sleep_stay, is sleeping…, dort…
+sleep_debuff, wakes up!, se réveille !
