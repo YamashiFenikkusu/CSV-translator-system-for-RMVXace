@@ -1,7 +1,7 @@
 #==============================================================================
 # ** Multilingual System
 #------------------------------------------------------------------------------
-# ★ Yamashi Fenikkusu - v0.7.5
+# ★ Yamashi Fenikkusu - v0.8
 # https://github.com/YamashiFenikkusu/RMVXace-multilingual-system/tree/main
 #------------------------------------------------------------------------------
 # This script able your game to be multilingual by using csv file.
@@ -784,6 +784,29 @@ class RPG::Class
 	#--------------------------------------------------------------------------
   def name
     MultilingualSystem.read_key("Database_Class", translation_key) || @name
+  end
+end
+
+#==============================================================================
+# * RPG::Map modifier
+#==============================================================================
+class RPG::Map
+	#--------------------------------------------------------------------------
+	# * Check if translation key isn't empty, used for database
+	#--------------------------------------------------------------------------
+  def translation_key
+    if @translation_key.nil?
+      note.match(/<key:\s*(\w+)>/i)
+      @translation_key = $1 || "item_#{@id}"
+    end
+    @translation_key
+  end
+	
+	#--------------------------------------------------------------------------
+	# * Override display name
+	#--------------------------------------------------------------------------
+  def display_name
+    MultilingualSystem.read_key("Database_Maps", translation_key) || @display_name
   end
 end
 
