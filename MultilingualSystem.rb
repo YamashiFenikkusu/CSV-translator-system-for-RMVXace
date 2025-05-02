@@ -1,11 +1,19 @@
 #==============================================================================
 # ** Multilingual System
 #------------------------------------------------------------------------------
-# ★ Yamashi Fenikkusu - v0.8
-# https://github.com/YamashiFenikkusu/RMVXace-multilingual-system/tree/main
+# ★ Yamashi Fenikkusu - v1.0
+# https://github.com/YamashiFenikkusu/CSV-translator-system-for-RMVXace/tree/main
 #------------------------------------------------------------------------------
 # This script able your game to be multilingual by using csv file.
 # A good comprehension of programmation and csv system are required.
+#------------------------------------------------------------------------------
+# TERMS OF USE:
+# -Credit ★Yamashi Fenikkusu.
+# -You need a valid RPG Maker VXace licence.
+# -Free for non commercial and commercial use.
+# -You can modify the script for your own usage, but don't redistribute it.
+# -Redistribution on other websites without authorization are forbidden.
+# -It's not obligatory, but a DM is appreciated if you use this script. 
 #------------------------------------------------------------------------------
 # How to use:
 # -You need to have a "CSV" named folder in the project root.
@@ -15,7 +23,9 @@
 # -For messages event comand and choice, use this format for display a message
 #  contained in a csv file: (tableName, keyName)
 # -For linebreak in the csv files for messages and database, use the \L balise.
-# -You can parameter this script at the line 65 and read instruction at line 28.
+# -For use the system in database, use <key: keyNameInCorrespondingCSV> in the
+#  Notes part.
+# -You can parameter this script at the line 75 and read instruction at line 38.
 #==============================================================================
 # /!\ DISCLAIMER /!\
 # This script doesn't integrate AI translator, you've the charge of yours translations.
@@ -148,6 +158,16 @@ class MultilingualSystem
 	def self.default_language; return @default_lang end
 	
 	#--------------------------------------------------------------------------
+	# * Return language count
+	#--------------------------------------------------------------------------
+	def self.return_lang_count; return @@languages.size end
+	
+	#--------------------------------------------------------------------------
+	# * Return specific language
+	#--------------------------------------------------------------------------
+	def self.return_specific_language(id); return @@languages[id] end
+	
+	#--------------------------------------------------------------------------
 	# * Return local folders
 	#--------------------------------------------------------------------------
 	def self.return_set_local_pictures_folder; return @set_local_pictures_folder end
@@ -207,11 +227,11 @@ class CSVReader
 	#--------------------------------------------------------------------------
 	def get_value(key, language)
 		lang_index = @headers.index(language)
-		return nil unless lang_index
+		return "[ERROR: Translation failed]" unless lang_index
 		@data.each do |row|
 			return row[lang_index] if row[0] == key
 		end
-		nil
+		"[ERROR: Translation failed]"
 	end
 end
 
@@ -402,7 +422,7 @@ class Game_Message
           translated = MultilingualSystem.read_key(table, key)
           result = translated || "#{table}.#{key}"
         end
-      rescue => e
+        rescue => e
         result = "[ERROR: Translation failed]"
       end
     end
@@ -833,12 +853,12 @@ end
 class Scene_Title
   alias multilingual_start start
 	
-	#--------------------------------------------------------------------------
-	# * Override start
-	#--------------------------------------------------------------------------
+  #--------------------------------------------------------------------------
+  # * Override start
+  #--------------------------------------------------------------------------
   def start
     multilingual_start
-		$vocab_skill_types_keys = $data_system.skill_types
+    $vocab_skill_types_keys = $data_system.skill_types
     Vocab.override_skill_type
   end
 end
