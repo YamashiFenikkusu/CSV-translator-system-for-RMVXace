@@ -4,8 +4,10 @@ This script plug'n use able your game to be multilingual with using of csv file.
 
 <h2>How to use:</h2>
 -You need to have a <b>CSV</b> named folder in the project root.<br/>
--A CSV folder are offered on the GitHub page, it's containing a csv file for Vocab module. Files csv for actors, weapons will come later. The csv files offered on the Github page contain translation in English and French.<br/>
--For messages event comand and choice, use this format for display a message contained in a csv file: <b>(tableName, keyName)</b>
+-A CSV folder are offered on the GitHub page, it's containing csv files for Vocab module, actors, armors, class, enemies, items, skills, states and weapons. The csv files offered on the Github page contain translation in English and French.<br/>
+-For messages event comand and choice, use this format for display a message contained in a csv file: <b>(tableName, keyName)</b><br/>
+-For mark breakline in the csv file, use the new <b>\L</b> message command.<br/>
+-All informations to know are writted in the script
 
 <h2>Revisions</h2>
 <h3>-v0.7</h3>
@@ -27,3 +29,12 @@ This script plug'n use able your game to be multilingual with using of csv file.
 -Add methods for setting language of the game with Game.ini.
 <h3>-v0.1:</h3>
 -Add partial translation for Vocab module and integrate simple CSV reader.
+
+
+<h2>TERMS OF USE:</h2>
+-Credit ★Yamashi Fenikkusu.<br/>
+-You need a valid RPG Maker VXace licence.<br/>
+-Free for non commercial and commercial use.<br/>
+-You can modify the script for your own usage, but don't redistribute it.<br/>
+-Redistribution on other websites without authorization are forbidden.<br/>
+-It's not obligatory, but a DM is appreciated if you use this script.
