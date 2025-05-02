@@ -7,9 +7,13 @@ This script plug'n use able your game to be multilingual with using of csv file.
 -A CSV folder are offered on the GitHub page, it's containing csv files for Vocab module, actors, armors, class, enemies, items, skills, states and weapons. The csv files offered on the Github page contain translation in English and French.<br/>
 -For messages event comand and choice, use this format for display a message contained in a csv file: <b>(tableName, keyName)</b><br/>
 -For mark breakline in the csv file, use the new <b>\L</b> message command.<br/>
--All informations to know are writted in the script
+-All informations to know are writted in the script.<br/>
+-A add on for pause menu and title screen is available. The add on set new menu to change the game language during a game session.
 
 <h2>Revisions</h2>
+<h3>-v1.0</h3>
+-Add new useful methods for other scripts.<br/>
+-Minor adjustements.
 <h3>-v0.7</h3>
 -Finish translation of Vocab module.<br/>
 -Add translation system for skill types, enemies and states<br/>
