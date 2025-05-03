@@ -95,3 +95,7 @@ agility,Agility,Agilité
 luck,Luck,Chance
 skilltype_special,Special,Spéciales
 skilltype_magic,Magic,Magie
+menu_lang,Language,Langue
+menu_langEN,English,English
+menu_langFR,Français,Français
+menu_lang_header,Please select your language.,Veuillez sélectionnez votre langue.
