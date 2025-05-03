@@ -1,12 +1,20 @@
 #==============================================================================
 # ** Multilingual System - Simple Add on for menus
 #------------------------------------------------------------------------------
-# ★ Yamashi Fenikkusu - v0.6
+# ★ Yamashi Fenikkusu - v0.8
 # https://github.com/YamashiFenikkusu/CSV-translator-system-for-RMVXace/tree/main
 #------------------------------------------------------------------------------
 # This add on set an option on title screen and pause menu to changing the
-# language game during a game session. It's needing the Multilingual System v1.0
+# language game during a game session. It's needing the Multilingual System v1.1
 # (available on the main Github page). Put this script under the Multilingual System.
+#------------------------------------------------------------------------------
+# TERMS OF USE:
+# -Same as the main MultilingualSystem script.
+#------------------------------------------------------------------------------
+# How to use:
+# -Set if you want language option in pause menu and title screen at line 24.
+# -You can call the language option menu in your own script by the call method
+#  SceneManager.call(Scene_Language)
 #==============================================================================
 
 #==============================================================================
@@ -28,11 +36,13 @@ end
 #==============================================================================
 module Vocab
 	@VOCAB_MENU_LANG = "menu_lang"
+	@VOCAB_MENU_HEADER = "menu_lang_header"
 	
 	#--------------------------------------------------------------------------
-	# * Menu lang
+	# * Menu lang translated key
 	#--------------------------------------------------------------------------
 	def self.menu_lang; return MultilingualSystem.read_key("Database_Vocab", @VOCAB_MENU_LANG) end
+	def self.menu_lang_header; return MultilingualSystem.read_key("Database_Vocab", @VOCAB_MENU_HEADER) end
 end
 
 #==============================================================================
@@ -160,8 +170,8 @@ class Window_LanguageMenu < Window_Command
   # * Make command list
   #--------------------------------------------------------------------------
   def make_command_list
-		MultilingualSystem.return_lang_count.times do |i|
-      lang = MultilingualSystem.return_specific_language(i)
+		MultilingualSystem.return_language_array.size.times do |i|
+      lang = MultilingualSystem.return_language_array[i]
 			translated_key = MultilingualSystem.read_key("Database_Vocab", "menu_lang"<<lang)
 			add_command(translated_key, :"switch_to_#{lang}")
     end
@@ -180,6 +190,7 @@ class Scene_Language < Scene_Base
     super
 		create_background
     create_command_window
+		create_header
   end
 	
 	#--------------------------------------------------------------------------
@@ -192,12 +203,20 @@ class Scene_Language < Scene_Base
   end
 	
 	#--------------------------------------------------------------------------
+  # * Create header
+  #--------------------------------------------------------------------------
+  def create_header
+    @help_window = Window_Help.new(1)
+    @help_window.set_text(Vocab.menu_lang_header)
+  end
+	
+	#--------------------------------------------------------------------------
   # * Create Command Window
   #--------------------------------------------------------------------------
   def create_command_window
     @command_window = Window_LanguageMenu.new
-		MultilingualSystem.return_lang_count.times do |i|
-			lang = MultilingualSystem.return_specific_language(i)
+		MultilingualSystem.return_language_array.size.times do |i|
+			lang = MultilingualSystem.return_language_array[i]
 			@command_window.set_handler(:"switch_to_#{lang}", method(:command_lang))
 		end
 		@command_window.set_handler(:cancel, method(:return_scene))
