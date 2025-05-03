@@ -1,7 +1,7 @@
 #==============================================================================
 # ** Multilingual System
 #------------------------------------------------------------------------------
-# ★ Yamashi Fenikkusu - v1.0
+# ★ Yamashi Fenikkusu - v1.1
 # https://github.com/YamashiFenikkusu/CSV-translator-system-for-RMVXace/tree/main
 #------------------------------------------------------------------------------
 # This script able your game to be multilingual by using csv file.
@@ -17,7 +17,7 @@
 #------------------------------------------------------------------------------
 # How to use:
 # -You need to have a "CSV" named folder in the project root.
-# -A CSV folder are offered on the GitHub page, it's containing a csv file for
+# -A CSV folder is offered on the GitHub page, it's containing a csv file for
 #  Vocab module. Files csv for actors, weapons will come later. The csv files
 #  offered on the Github page contain translation in English and French.
 # -For messages event comand and choice, use this format for display a message
@@ -158,14 +158,9 @@ class MultilingualSystem
 	def self.default_language; return @default_lang end
 	
 	#--------------------------------------------------------------------------
-	# * Return language count
+	# * Return language array
 	#--------------------------------------------------------------------------
-	def self.return_lang_count; return @@languages.size end
-	
-	#--------------------------------------------------------------------------
-	# * Return specific language
-	#--------------------------------------------------------------------------
-	def self.return_specific_language(id); return @@languages[id] end
+	def self.return_language_array; return @@languages end
 	
 	#--------------------------------------------------------------------------
 	# * Return local folders
