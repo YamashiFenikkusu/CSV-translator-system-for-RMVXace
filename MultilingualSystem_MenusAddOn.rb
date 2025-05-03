@@ -1,7 +1,7 @@
 #==============================================================================
 # ** Multilingual System - Simple Add on for menus
 #------------------------------------------------------------------------------
-# ★ Yamashi Fenikkusu - v0.5
+# ★ Yamashi Fenikkusu - v0.6
 # https://github.com/YamashiFenikkusu/CSV-translator-system-for-RMVXace/tree/main
 #------------------------------------------------------------------------------
 # This add on set an option on title screen and pause menu to changing the
@@ -178,7 +178,17 @@ class Scene_Language < Scene_Base
   #--------------------------------------------------------------------------
   def start
     super
+		create_background
     create_command_window
+  end
+	
+	#--------------------------------------------------------------------------
+  # * Create background
+  #--------------------------------------------------------------------------
+  def create_background
+    @background_sprite = Sprite.new
+    @background_sprite.bitmap = SceneManager.background_bitmap
+    @background_sprite.color.set(16, 16, 16, 128)
   end
 	
 	#--------------------------------------------------------------------------
