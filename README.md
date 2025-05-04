@@ -8,7 +8,7 @@ This script plug'n use able your game to be multilingual with using of csv file.
 -For messages event comand and choice, use this format for display a message contained in a csv file: <b>(tableName, keyName)</b><br/>
 -For mark breakline in the csv file, use the new <b>\L</b> message command.<br/>
 -All informations to know are writted in the script.<br/>
--A add on for pause menu and title screen is available. The add on set new menu to change the game language during a game session.
+-A add on for pause menu and title screen is available. The add on set a new menu to change the game language during a game session and/or at the first initialization of the game.
 
 <h2>Revisions</h2>
 <h3>-v1.0</h3>
