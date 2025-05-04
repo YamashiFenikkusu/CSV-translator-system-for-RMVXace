@@ -140,7 +140,7 @@ class MultilingualSystem
 		end
 		#Add Language=XX if this line doesn't exist
 		unless found
-			lines << "\n" << "Language=#{@default_lang}\n"
+			lines << "Language=#{@default_lang}\n"
 			File.open("Game.ini", "w") { |f| f.puts lines }
 			lang = @default_lang
 		end
