@@ -1,7 +1,7 @@
 #==============================================================================
 # ** Multilingual System - Simple Add on for menus
 #------------------------------------------------------------------------------
-# ★ Yamashi Fenikkusu - v0.8
+# ★ Yamashi Fenikkusu - v0.9
 # https://github.com/YamashiFenikkusu/CSV-translator-system-for-RMVXace/tree/main
 #------------------------------------------------------------------------------
 # This add on set an option on title screen and pause menu to changing the
@@ -23,12 +23,53 @@
 class MultilingualSystem
 	@SHOW_OPTION_TITLE_SCREEN = true
 	@SHOW_OPTION_PAUSE_MENU = true
+	@SHOW_OPTION_IF_LANGUAGE_NO_FOUND = true
+	@@no_present_language_in_game_ini = false #Don't touch
 	
 	#--------------------------------------------------------------------------
 	# * Return show option
 	#--------------------------------------------------------------------------
 	def self.return_show_option_title_screen; return @SHOW_OPTION_TITLE_SCREEN end
 	def self.return_show_option_pause_menu; return @SHOW_OPTION_PAUSE_MENU end
+	def self.return_show_option_if_language_no_found; return @SHOW_OPTION_IF_LANGUAGE_NO_FOUND end
+	def self.return_show_option_if_language_no_founded; return @@no_present_language_in_game_ini end
+	
+	#--------------------------------------------------------------------------
+	# * Turn off no language present
+	#--------------------------------------------------------------------------
+	def self.turn_off_no_language_present; @@no_present_language_in_game_ini = false end
+		
+	#--------------------------------------------------------------------------
+	# * Read language in Game.ini
+	#--------------------------------------------------------------------------
+	def self.read_ini_language
+		lang = nil
+		lines = []
+		found = false
+		File.readlines("Game.ini").each do |line|
+			if line =~ /^Language=(.+)$/i
+				lang = $1.strip
+				if @@languages.include?($1.strip) == false
+					lang = @default_lang
+				end
+				found = true
+			end
+			lines << line
+		end
+		#Add Language=XX if this line doesn't exist
+		unless found
+			if @SHOW_OPTION_IF_LANGUAGE_NO_FOUND == false
+				lines << "Language=#{@default_lang}\n"
+				File.open("Game.ini", "w") { |f| f.puts lines }
+				lang = @default_lang
+			else
+				lang = @default_lang
+				@@no_present_language_in_game_ini = true
+			end
+		end
+		puts return_show_option_if_language_no_founded
+		lang
+	end
 end
 
 #==============================================================================
@@ -119,6 +160,23 @@ end
 # * Scene_Title modifier
 #==============================================================================
 class Scene_Title < Scene_Base
+	#--------------------------------------------------------------------------
+  # * Override start
+  #--------------------------------------------------------------------------
+  def start
+    super
+    SceneManager.clear
+    Graphics.freeze
+    create_background
+    create_foreground
+    play_title_music
+    if (MultilingualSystem.return_show_option_if_language_no_founded == true) and (MultilingualSystem.return_show_option_if_language_no_found == true)
+			SceneManager.call(Scene_First_Language)
+		else
+			create_command_window
+		end
+  end
+	
 	#--------------------------------------------------------------------------
   # * Override create Command Window
   #--------------------------------------------------------------------------
@@ -229,5 +287,98 @@ class Scene_Language < Scene_Base
     lang = @command_window.current_symbol.to_s.sub("switch_to_", "")
 		MultilingualSystem.set_language(lang)
 		return_scene
+  end
+end
+
+#==============================================================================
+# * Window_LanguageMenu
+#==============================================================================
+class Window_First_LanguageMenu < Window_Command
+	#--------------------------------------------------------------------------
+  # * Initialize
+  #--------------------------------------------------------------------------
+  def initialize
+		@commands_to_add = []
+    super(0, 0)
+    update_placement
+    self.openness = 0
+    open
+  end
+	
+  #--------------------------------------------------------------------------
+  # * Window width
+  #--------------------------------------------------------------------------
+  def window_width; return 200 end
+	
+  #--------------------------------------------------------------------------
+  # * Update placement
+  #--------------------------------------------------------------------------
+  def update_placement
+    self.x = (Graphics.width - width) / 2
+    self.y = (Graphics.height - height) / 2
+  end
+	
+  #--------------------------------------------------------------------------
+  # * Make command list
+  #--------------------------------------------------------------------------
+  def make_command_list
+		MultilingualSystem.return_language_array.size.times do |i|
+      lang = MultilingualSystem.return_language_array[i]
+			translated_key = MultilingualSystem.read_key("Database_Vocab", "menu_lang"<<lang)
+			add_command(translated_key, :"switch_to_#{lang}")
+    end
+  end
+end
+
+#==============================================================================
+# * Scene_Language
+#==============================================================================
+class Scene_First_Language < Scene_Base
+	#--------------------------------------------------------------------------
+  # * Start
+  #--------------------------------------------------------------------------
+  def start
+    super
+		create_background
+    create_command_window
+		create_header
+  end
+	
+	#--------------------------------------------------------------------------
+  # * Create background
+  #--------------------------------------------------------------------------
+  def create_background
+    @background_sprite = Sprite.new
+    @background_sprite.bitmap = SceneManager.background_bitmap
+    @background_sprite.color.set(16, 16, 16, 128)
+  end
+	
+	#--------------------------------------------------------------------------
+  # * Create header
+  #--------------------------------------------------------------------------
+  def create_header
+    @help_window = Window_Help.new(1)
+    @help_window.set_text(Vocab.menu_lang_header)
+  end
+	
+	#--------------------------------------------------------------------------
+  # * Create Command Window
+  #--------------------------------------------------------------------------
+  def create_command_window
+    @command_window = Window_First_LanguageMenu.new
+		MultilingualSystem.return_language_array.size.times do |i|
+			lang = MultilingualSystem.return_language_array[i]
+			@command_window.set_handler(:"switch_to_#{lang}", method(:command_lang))
+		end
+  end
+	
+	#--------------------------------------------------------------------------
+  # * Command lang
+  #--------------------------------------------------------------------------
+	def command_lang
+    lang = @command_window.current_symbol.to_s.sub("switch_to_", "")
+		MultilingualSystem.set_language(lang)
+		MultilingualSystem.turn_off_no_language_present
+		SceneManager.call(Scene_Title)
   end
 end
