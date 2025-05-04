@@ -1,7 +1,7 @@
 #==============================================================================
 # ** Multilingual System - Simple Add on for menus
 #------------------------------------------------------------------------------
-# ★ Yamashi Fenikkusu - v0.9
+# ★ Yamashi Fenikkusu - v1.0
 # https://github.com/YamashiFenikkusu/CSV-translator-system-for-RMVXace/tree/main
 #------------------------------------------------------------------------------
 # This add on set an option on title screen and pause menu to changing the
@@ -40,7 +40,7 @@ class MultilingualSystem
 	def self.turn_off_no_language_present; @@no_present_language_in_game_ini = false end
 		
 	#--------------------------------------------------------------------------
-	# * Read language in Game.ini
+	# * Override read language in Game.ini
 	#--------------------------------------------------------------------------
 	def self.read_ini_language
 		lang = nil
@@ -58,16 +58,11 @@ class MultilingualSystem
 		end
 		#Add Language=XX if this line doesn't exist
 		unless found
-			if @SHOW_OPTION_IF_LANGUAGE_NO_FOUND == false
-				lines << "Language=#{@default_lang}\n"
-				File.open("Game.ini", "w") { |f| f.puts lines }
-				lang = @default_lang
-			else
-				lang = @default_lang
-				@@no_present_language_in_game_ini = true
-			end
+			lines << "Language=#{@default_lang}\n"
+			File.open("Game.ini", "w") { |f| f.puts lines }
+			lang = @default_lang
+			if @SHOW_OPTION_IF_LANGUAGE_NO_FOUND == true; @@no_present_language_in_game_ini = true end
 		end
-		puts return_show_option_if_language_no_founded
 		lang
 	end
 end
@@ -171,7 +166,7 @@ class Scene_Title < Scene_Base
     create_foreground
     play_title_music
     if (MultilingualSystem.return_show_option_if_language_no_founded == true) and (MultilingualSystem.return_show_option_if_language_no_found == true)
-			SceneManager.call(Scene_First_Language)
+			SceneManager.call(Scene_Language)
 		else
 			create_command_window
 		end
@@ -204,7 +199,6 @@ class Window_LanguageMenu < Window_Command
   # * Initialize
   #--------------------------------------------------------------------------
   def initialize
-		@commands_to_add = []
     super(0, 0)
     update_placement
     self.openness = 0
@@ -235,63 +229,21 @@ class Window_LanguageMenu < Window_Command
     end
     add_command(Vocab::cancel, :cancel)
   end
-end
-
-#==============================================================================
-# * Scene_Language
-#==============================================================================
-class Scene_Language < Scene_Base
-	#--------------------------------------------------------------------------
-  # * Start
-  #--------------------------------------------------------------------------
-  def start
-    super
-		create_background
-    create_command_window
-		create_header
-  end
 	
 	#--------------------------------------------------------------------------
-  # * Create background
+  # * Make first command list
   #--------------------------------------------------------------------------
-  def create_background
-    @background_sprite = Sprite.new
-    @background_sprite.bitmap = SceneManager.background_bitmap
-    @background_sprite.color.set(16, 16, 16, 128)
-  end
-	
-	#--------------------------------------------------------------------------
-  # * Create header
-  #--------------------------------------------------------------------------
-  def create_header
-    @help_window = Window_Help.new(1)
-    @help_window.set_text(Vocab.menu_lang_header)
-  end
-	
-	#--------------------------------------------------------------------------
-  # * Create Command Window
-  #--------------------------------------------------------------------------
-  def create_command_window
-    @command_window = Window_LanguageMenu.new
+  def make_first_command_list
 		MultilingualSystem.return_language_array.size.times do |i|
-			lang = MultilingualSystem.return_language_array[i]
-			@command_window.set_handler(:"switch_to_#{lang}", method(:command_lang))
-		end
-		@command_window.set_handler(:cancel, method(:return_scene))
-  end
-	
-	#--------------------------------------------------------------------------
-  # * Command lang
-  #--------------------------------------------------------------------------
-	def command_lang
-    lang = @command_window.current_symbol.to_s.sub("switch_to_", "")
-		MultilingualSystem.set_language(lang)
-		return_scene
+      lang = MultilingualSystem.return_language_array[i]
+			translated_key = MultilingualSystem.read_key("Database_Vocab", "menu_lang"<<lang)
+			add_command(translated_key, :"switch_to_#{lang}")
+    end
   end
 end
 
 #==============================================================================
-# * Window_LanguageMenu
+# * Window_First_LanguageMenu
 #==============================================================================
 class Window_First_LanguageMenu < Window_Command
 	#--------------------------------------------------------------------------
@@ -333,14 +285,16 @@ end
 #==============================================================================
 # * Scene_Language
 #==============================================================================
-class Scene_First_Language < Scene_Base
+class Scene_Language < Scene_Base
 	#--------------------------------------------------------------------------
   # * Start
   #--------------------------------------------------------------------------
   def start
     super
 		create_background
-    create_command_window
+		if (MultilingualSystem.return_show_option_if_language_no_founded == true) and (MultilingualSystem.return_show_option_if_language_no_found == true)
+			create_first_command_window
+		else; create_command_window end
 		create_header
   end
 	
@@ -362,13 +316,25 @@ class Scene_First_Language < Scene_Base
   end
 	
 	#--------------------------------------------------------------------------
-  # * Create Command Window
+  # * Create command window
   #--------------------------------------------------------------------------
   def create_command_window
-    @command_window = Window_First_LanguageMenu.new
+    @command_window = Window_LanguageMenu.new
 		MultilingualSystem.return_language_array.size.times do |i|
 			lang = MultilingualSystem.return_language_array[i]
 			@command_window.set_handler(:"switch_to_#{lang}", method(:command_lang))
+		end
+		@command_window.set_handler(:cancel, method(:return_scene))
+  end
+	
+	#--------------------------------------------------------------------------
+  # * Create first command window
+  #--------------------------------------------------------------------------
+  def create_first_command_window
+    @command_window = Window_First_LanguageMenu.new
+		MultilingualSystem.return_language_array.size.times do |i|
+			lang = MultilingualSystem.return_language_array[i]
+			@command_window.set_handler(:"switch_to_#{lang}", method(:first_command_lang))
 		end
   end
 	
@@ -376,6 +342,15 @@ class Scene_First_Language < Scene_Base
   # * Command lang
   #--------------------------------------------------------------------------
 	def command_lang
+    lang = @command_window.current_symbol.to_s.sub("switch_to_", "")
+		MultilingualSystem.set_language(lang)
+		return_scene
+  end
+	
+	#--------------------------------------------------------------------------
+  # * First command lang
+  #--------------------------------------------------------------------------
+	def first_command_lang
     lang = @command_window.current_symbol.to_s.sub("switch_to_", "")
 		MultilingualSystem.set_language(lang)
 		MultilingualSystem.turn_off_no_language_present
