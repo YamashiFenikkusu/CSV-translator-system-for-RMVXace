@@ -2,7 +2,7 @@
 # ** Multilingual System
 #------------------------------------------------------------------------------
 # ★ Yamashi Fenikkusu - v1.1
-# https://github.com/YamashiFenikkusu/CSV-translator-system-for-RMVXace/tree/main
+# https://github.com/YamashiFenikkusu/CSV-translator-system-for-RPG-Maker-VXace
 #------------------------------------------------------------------------------
 # This script able your game to be multilingual by using csv file.
 # A good comprehension of programmation and csv system are required.
