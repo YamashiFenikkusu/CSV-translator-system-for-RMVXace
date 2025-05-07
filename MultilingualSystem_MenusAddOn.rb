@@ -2,7 +2,7 @@
 # ** Multilingual System - Simple Add on for menus
 #------------------------------------------------------------------------------
 # ★ Yamashi Fenikkusu - v1.0
-# https://github.com/YamashiFenikkusu/CSV-translator-system-for-RMVXace/tree/main
+# https://github.com/YamashiFenikkusu/CSV-translator-system-for-RPG-Maker-VXace/tree/main
 #------------------------------------------------------------------------------
 # This add on set an option on title screen and pause menu to changing the
 # language game during a game session. It's needing the Multilingual System v1.1
